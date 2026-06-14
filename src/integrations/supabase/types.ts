@@ -14,7 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      generations: {
+        Row: {
+          created_at: string
+          creator_dna: Json | null
+          duration: string
+          error: string | null
+          extracted_insights: string | null
+          id: string
+          image_paths: Json
+          mood: string
+          platform: string
+          reference_transcript: string | null
+          reference_url: string | null
+          result: Json | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          creator_dna?: Json | null
+          duration: string
+          error?: string | null
+          extracted_insights?: string | null
+          id?: string
+          image_paths?: Json
+          mood: string
+          platform: string
+          reference_transcript?: string | null
+          reference_url?: string | null
+          result?: Json | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          creator_dna?: Json | null
+          duration?: string
+          error?: string | null
+          extracted_insights?: string | null
+          id?: string
+          image_paths?: Json
+          mood?: string
+          platform?: string
+          reference_transcript?: string | null
+          reference_url?: string | null
+          result?: Json | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          fallback_model: string | null
+          openrouter_api_key: string | null
+          primary_model: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          fallback_model?: string | null
+          openrouter_api_key?: string | null
+          primary_model?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          fallback_model?: string | null
+          openrouter_api_key?: string | null
+          primary_model?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
