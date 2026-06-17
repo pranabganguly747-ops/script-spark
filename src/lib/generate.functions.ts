@@ -90,8 +90,11 @@ export const generateScript = createServerFn({ method: "POST" })
       .maybeSingle();
 
     const useOpenRouter = !!settings?.openrouter_api_key;
-    const primaryModel = settings?.primary_model || "google/gemini-3-flash-preview";
-    const fallbackModel = settings?.fallback_model || "google/gemini-2.5-flash";
+    // Both models are FREE on Lovable AI Gateway and multimodal (text + image).
+    // gemini-2.5-flash = primary (balanced, very low failure rate)
+    // gemini-2.5-flash-lite = fallback (fastest, lowest server load)
+    const primaryModel = settings?.primary_model || "google/gemini-2.5-flash";
+    const fallbackModel = settings?.fallback_model || "google/gemini-2.5-flash-lite";
 
     // Create generation row
     const { data: gen, error: insErr } = await supabase
