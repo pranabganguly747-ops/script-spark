@@ -112,6 +112,16 @@ function AuthPage() {
             Continue with Google
           </button>
 
+          <button
+            type="button"
+            onClick={handleGuest}
+            disabled={guestLoading}
+            className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-white/5 px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-white/10 disabled:opacity-60"
+          >
+            {guestLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserRound className="h-4 w-4" />}
+            Continue as guest
+          </button>
+
           <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
             <div className="flex-1 h-px bg-border" />or<div className="flex-1 h-px bg-border" />
           </div>
