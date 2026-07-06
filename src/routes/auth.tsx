@@ -17,6 +17,20 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [guestLoading, setGuestLoading] = useState(false);
+
+  async function handleGuest() {
+    setGuestLoading(true);
+    try {
+      const { error } = await supabase.auth.signInAnonymously();
+      if (error) throw error;
+      toast.success("Welcome, guest");
+      navigate({ to: "/dashboard", replace: true });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Guest sign-in failed");
+      setGuestLoading(false);
+    }
+  }
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
