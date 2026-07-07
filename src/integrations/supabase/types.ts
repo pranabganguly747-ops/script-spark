@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       generations: {
         Row: {
+          approved_pointers: Json | null
           created_at: string
           creator_dna: Json | null
           duration: string
@@ -24,10 +25,14 @@ export type Database = {
           id: string
           image_paths: Json
           mood: string
+          package_markdown: string | null
           platform: string
+          raw_content: string | null
           reference_transcript: string | null
           reference_url: string | null
+          research: Json | null
           result: Json | null
+          source_url: string | null
           status: string
           title: string
           updated_at: string
@@ -35,6 +40,7 @@ export type Database = {
           variants: Json | null
         }
         Insert: {
+          approved_pointers?: Json | null
           created_at?: string
           creator_dna?: Json | null
           duration: string
@@ -43,10 +49,14 @@ export type Database = {
           id?: string
           image_paths?: Json
           mood: string
+          package_markdown?: string | null
           platform: string
+          raw_content?: string | null
           reference_transcript?: string | null
           reference_url?: string | null
+          research?: Json | null
           result?: Json | null
+          source_url?: string | null
           status?: string
           title?: string
           updated_at?: string
@@ -54,6 +64,7 @@ export type Database = {
           variants?: Json | null
         }
         Update: {
+          approved_pointers?: Json | null
           created_at?: string
           creator_dna?: Json | null
           duration?: string
@@ -62,10 +73,14 @@ export type Database = {
           id?: string
           image_paths?: Json
           mood?: string
+          package_markdown?: string | null
           platform?: string
+          raw_content?: string | null
           reference_transcript?: string | null
           reference_url?: string | null
+          research?: Json | null
           result?: Json | null
+          source_url?: string | null
           status?: string
           title?: string
           updated_at?: string
