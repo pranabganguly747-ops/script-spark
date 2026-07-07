@@ -4,7 +4,7 @@ import {
   Sparkles, Settings, LogOut, Loader2, Wand2, ChevronRight,
   Link2, FileText, Plus, Trash2, PanelLeftClose, PanelLeftOpen,
   Youtube, Instagram, Music2, Linkedin, Film, Search, Zap,
-  CheckCircle2, Circle, AlertCircle, Copy, Check,
+  CheckCircle2, Circle, AlertCircle, Copy, Check, ImageIcon, X, Upload,
 } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
