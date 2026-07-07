@@ -167,7 +167,11 @@ function Dashboard() {
 
   async function handleAnalyze() {
     if (analyzing) return;
-    const urlTrim = sourceUrl.trim();
+    let urlTrim = sourceUrl.trim();
+    // Extract first URL if user pasted extra text like "Read more at: https://..."
+    const urlMatch = urlTrim.match(/https?:\/\/[^\s]+/i);
+    if (urlMatch) urlTrim = urlMatch[0];
+    else if (urlTrim && !/^https?:\/\//i.test(urlTrim) && /^[\w-]+(\.[\w-]+)+/.test(urlTrim)) urlTrim = `https://${urlTrim}`;
     const textTrim = rawText.trim();
     if (!urlTrim && !textTrim && images.length === 0) {
       return toast.error("Add a URL, paste text, or upload screenshots");
