@@ -102,10 +102,28 @@ function Dashboard() {
 
   function newSession() {
     setActiveId(null);
-    setSourceUrl(""); setRawText("");
+    setSourceUrl(""); setRawText(""); setImages([]);
     setResearch(null); setMarkdown(null);
     setApprovedIds(new Set());
     setTitle("");
+  }
+
+  async function handleImageFiles(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    const arr = Array.from(files).slice(0, 6);
+    const encoded: string[] = [];
+    for (const f of arr) {
+      if (!f.type.startsWith("image/")) continue;
+      if (f.size > 5 * 1024 * 1024) { toast.error(`${f.name} is over 5MB`); continue; }
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result as string);
+        r.onerror = () => reject(r.error);
+        r.readAsDataURL(f);
+      });
+      encoded.push(dataUrl);
+    }
+    setImages(prev => [...prev, ...encoded].slice(0, 6));
   }
 
   async function loadHistoryItem(id: string) {
