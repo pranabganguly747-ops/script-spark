@@ -302,23 +302,51 @@ function Dashboard() {
                   <span className="grid h-7 w-7 place-items-center rounded-lg bg-gradient-primary text-primary-foreground text-xs font-bold shadow-glow">1</span>
                   <h2 className="font-display text-lg font-bold">Source material</h2>
                 </div>
-                <div className="flex gap-2">
-                  <button onClick={() => setInputMode("url")} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold border transition ${inputMode === "url" ? "bg-white/10 border-violet text-foreground" : "border-border text-muted-foreground hover:text-foreground"}`}>
+                <div className="inline-flex w-full rounded-lg bg-white/5 border border-border p-1 gap-1">
+                  <button onClick={() => setInputMode("url")} className={`flex-1 rounded-md px-3 py-1.5 text-xs font-semibold transition ${inputMode === "url" ? "bg-gradient-primary text-primary-foreground shadow-glow" : "text-muted-foreground hover:text-foreground"}`}>
                     <Link2 className="h-3.5 w-3.5 inline mr-1.5" /> URL
                   </button>
-                  <button onClick={() => setInputMode("text")} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold border transition ${inputMode === "text" ? "bg-white/10 border-violet text-foreground" : "border-border text-muted-foreground hover:text-foreground"}`}>
-                    <FileText className="h-3.5 w-3.5 inline mr-1.5" /> Paste text
+                  <button onClick={() => setInputMode("images")} className={`flex-1 rounded-md px-3 py-1.5 text-xs font-semibold transition ${inputMode === "images" ? "bg-gradient-primary text-primary-foreground shadow-glow" : "text-muted-foreground hover:text-foreground"}`}>
+                    <ImageIcon className="h-3.5 w-3.5 inline mr-1.5" /> Screenshots
+                  </button>
+                  <button onClick={() => setInputMode("text")} className={`flex-1 rounded-md px-3 py-1.5 text-xs font-semibold transition ${inputMode === "text" ? "bg-gradient-primary text-primary-foreground shadow-glow" : "text-muted-foreground hover:text-foreground"}`}>
+                    <FileText className="h-3.5 w-3.5 inline mr-1.5" /> Text
                   </button>
                 </div>
-                {inputMode === "url" ? (
+                {inputMode === "url" && (
                   <input value={sourceUrl} onChange={e => setSourceUrl(e.target.value)}
                     placeholder="https://article-or-blog-post.com/…"
                     className="w-full rounded-lg bg-white/5 border border-border px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring" />
-                ) : (
+                )}
+                {inputMode === "text" && (
                   <textarea value={rawText} onChange={e => setRawText(e.target.value)}
                     placeholder="Paste article body, notes, transcript, or research…"
                     rows={8}
                     className="w-full rounded-lg bg-white/5 border border-border px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring resize-none" />
+                )}
+                {inputMode === "images" && (
+                  <div className="space-y-3">
+                    <label className="flex flex-col items-center justify-center gap-2 w-full rounded-xl border-2 border-dashed border-border hover:border-violet/60 bg-white/5 hover:bg-white/10 px-4 py-8 cursor-pointer transition">
+                      <Upload className="h-6 w-6 text-muted-foreground" />
+                      <div className="text-sm font-semibold">Upload screenshots</div>
+                      <div className="text-xs text-muted-foreground">PNG, JPG, WebP · up to 6 images · 5MB each</div>
+                      <input type="file" accept="image/*" multiple className="hidden"
+                        onChange={e => { handleImageFiles(e.target.files); e.target.value = ""; }} />
+                    </label>
+                    {images.length > 0 && (
+                      <div className="grid grid-cols-3 gap-2">
+                        {images.map((src, i) => (
+                          <div key={i} className="relative group aspect-video rounded-lg overflow-hidden border border-border bg-black/40">
+                            <img src={src} alt={`Screenshot ${i + 1}`} className="h-full w-full object-cover" />
+                            <button onClick={() => setImages(prev => prev.filter((_, idx) => idx !== i))}
+                              className="absolute top-1 right-1 rounded-md bg-black/70 hover:bg-rose-500/80 p-1 opacity-0 group-hover:opacity-100 transition">
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 )}
                 <button onClick={handleAnalyze} disabled={analyzing}
                   className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-white/10 hover:bg-white/15 border border-border px-4 py-3 font-semibold transition disabled:opacity-60">
