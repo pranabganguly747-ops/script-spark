@@ -167,13 +167,43 @@ function Dashboard() {
 
   async function handleAnalyze() {
     if (analyzing) return;
-    if (!sourceUrl.trim() && !rawText.trim() && images.length === 0) {
+    const urlTrim = sourceUrl.trim();
+    const textTrim = rawText.trim();
+    if (!urlTrim && !textTrim && images.length === 0) {
       return toast.error("Add a URL, paste text, or upload screenshots");
     }
     setAnalyzing(true); setMarkdown(null); setResearch(null); setApprovedIds(new Set());
     try {
+      // Stage 0 — server-side scrape via Edge Function proxy (Jina Reader)
+      let scrapedMarkdown = "";
+      let scrapedTitle: string | null = null;
+      if (urlTrim) {
+        setAnalyzePhase("scraping");
+        try {
+          const scraped = await scrapeUrl(urlTrim);
+          scrapedMarkdown = scraped.markdown;
+          scrapedTitle = scraped.title;
+        } catch (err) {
+          const msg = err instanceof ScrapeError ? err.message : (err instanceof Error ? err.message : "Scrape failed");
+          toast.error(msg);
+          setAnalyzePhase("idle"); setAnalyzing(false);
+          return;
+        }
+      }
+
+      setAnalyzePhase("extracting");
+      const combinedText = [textTrim, scrapedMarkdown && (scrapedTitle ? `# ${scrapedTitle}\n\n${scrapedMarkdown}` : scrapedMarkdown)]
+        .filter(Boolean).join("\n\n---\n\n");
+
       const res: any = await analyzeFn({
-        data: { sourceUrl: sourceUrl.trim(), rawText: rawText.trim(), images, mood, duration, platform },
+        data: {
+          // We've already fetched the URL; send content as rawText so the
+          // server doesn't re-fetch. Keep sourceUrl for history/attribution.
+          sourceUrl: urlTrim,
+          rawText: combinedText,
+          images,
+          mood, duration, platform,
+        },
       });
       const r = res.research as ResearchPayload;
       setResearch(r);
@@ -183,7 +213,7 @@ function Dashboard() {
       toast.success(`Extracted ${r.interactive_pointers.length} pointers`);
       refreshHistory();
     } catch (err) { toast.error(err instanceof Error ? err.message : "Analysis failed"); }
-    finally { setAnalyzing(false); }
+    finally { setAnalyzing(false); setAnalyzePhase("idle"); }
   }
 
   async function handleGenerate() {
