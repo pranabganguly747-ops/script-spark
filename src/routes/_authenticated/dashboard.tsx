@@ -381,8 +381,20 @@ function Dashboard() {
                   </div>
                 )}
                 <button onClick={handleAnalyze} disabled={analyzing}
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-white/10 hover:bg-white/15 border border-border px-4 py-3 font-semibold transition disabled:opacity-60">
-                  {analyzing ? <><Loader2 className="h-4 w-4 animate-spin" /> Analyzing source…</> : <><Search className="h-4 w-4" /> Analyze content</>}
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-primary hover:brightness-110 text-primary-foreground shadow-glow px-4 py-3 font-semibold transition disabled:opacity-60">
+                  {analyzing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      {analyzePhase === "scraping"
+                        ? "🛡️ Bypassing security & reading page…"
+                        : "🧬 Extracting 5–8 key viral pointers…"}
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4" />
+                      {inputMode === "url" ? "Analyze Website ✨" : "Analyze content"}
+                    </>
+                  )}
                 </button>
               </div>
 
