@@ -211,8 +211,8 @@ export const analyzeContent = createServerFn({ method: "POST" })
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) throw new Error("AI service not configured");
 
-    if (!data.sourceUrl && !data.rawText) {
-      throw new Error("Provide a URL or paste raw content");
+    if (!data.sourceUrl && !data.rawText && (!data.images || data.images.length === 0)) {
+      throw new Error("Provide a URL, paste text, or upload screenshots");
     }
 
     // Gather raw content
@@ -224,7 +224,7 @@ export const analyzeContent = createServerFn({ method: "POST" })
           ? `${rawContent}\n\n---\n\n[Fetched from ${data.sourceUrl}]\n${fetched}`
           : fetched;
       } catch (err) {
-        if (!rawContent) {
+        if (!rawContent && (!data.images || data.images.length === 0)) {
           throw new Error(
             `Could not fetch URL. Paste the article text directly. (${
               err instanceof Error ? err.message : "fetch failed"
@@ -234,8 +234,9 @@ export const analyzeContent = createServerFn({ method: "POST" })
       }
     }
 
-    if (rawContent.length < 40) {
-      throw new Error("Not enough content to analyze. Add more text.");
+    const hasImages = Array.isArray(data.images) && data.images.length > 0;
+    if (!hasImages && rawContent.length < 40) {
+      throw new Error("Not enough content to analyze. Add more text or upload screenshots.");
     }
 
     // Create pending row
@@ -247,7 +248,7 @@ export const analyzeContent = createServerFn({ method: "POST" })
         duration: data.duration,
         platform: data.platform,
         source_url: data.sourceUrl || null,
-        raw_content: rawContent.slice(0, 30000),
+        raw_content: (rawContent || (hasImages ? `[${data.images!.length} screenshot(s) provided]` : "")).slice(0, 30000),
         status: "analyzing",
       })
       .select()
@@ -255,20 +256,22 @@ export const analyzeContent = createServerFn({ method: "POST" })
     if (insErr || !gen) throw new Error(insErr?.message || "Failed to create record");
 
     try {
+      const userContent: any[] = [
+        {
+          type: "text",
+          text: `<execution_stage>ANALYZE_URL</execution_stage>\n\n<raw_content>\n${
+            rawContent ? rawContent.slice(0, 18000) : "[No text provided — extract insights from the attached screenshot(s).]"
+          }\n</raw_content>`,
+        },
+      ];
+      if (hasImages) {
+        for (const img of data.images!) {
+          userContent.push({ type: "image_url", image_url: { url: img } });
+        }
+      }
       const messages = [
         { role: "system", content: STAGE1_SYSTEM },
-        {
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: `<execution_stage>ANALYZE_URL</execution_stage>\n\n<raw_content>\n${rawContent.slice(
-                0,
-                18000,
-              )}\n</raw_content>`,
-            },
-          ],
-        },
+        { role: "user", content: userContent },
       ];
 
       const raw = await callWithFailover(messages, apiKey, true);
