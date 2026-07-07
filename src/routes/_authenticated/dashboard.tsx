@@ -15,6 +15,7 @@ import {
   analyzeContent, generateScriptPackage, listGenerations, getGeneration, deleteGeneration,
   type ResearchPayload, type InteractivePointer, type CreatorDNA,
 } from "@/lib/generate.functions";
+import { scrapeUrl, ScrapeError } from "@/services/scrape";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Workspace — ScriptDNA AI" }] }),
