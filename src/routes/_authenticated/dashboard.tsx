@@ -15,6 +15,7 @@ import {
   analyzeContent, generateScriptPackage, listGenerations, getGeneration, deleteGeneration,
   type ResearchPayload, type InteractivePointer, type CreatorDNA,
 } from "@/lib/generate.functions";
+import { scrapeUrl, ScrapeError } from "@/services/scrape";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Workspace — ScriptDNA AI" }] }),
@@ -87,6 +88,7 @@ function Dashboard() {
 
   // State
   const [analyzing, setAnalyzing] = useState(false);
+  const [analyzePhase, setAnalyzePhase] = useState<"idle" | "scraping" | "extracting">("idle");
   const [generating, setGenerating] = useState(false);
   const [research, setResearch] = useState<ResearchPayload | null>(null);
   const [approvedIds, setApprovedIds] = useState<Set<number>>(new Set());
@@ -165,13 +167,43 @@ function Dashboard() {
 
   async function handleAnalyze() {
     if (analyzing) return;
-    if (!sourceUrl.trim() && !rawText.trim() && images.length === 0) {
+    const urlTrim = sourceUrl.trim();
+    const textTrim = rawText.trim();
+    if (!urlTrim && !textTrim && images.length === 0) {
       return toast.error("Add a URL, paste text, or upload screenshots");
     }
     setAnalyzing(true); setMarkdown(null); setResearch(null); setApprovedIds(new Set());
     try {
+      // Stage 0 — server-side scrape via Edge Function proxy (Jina Reader)
+      let scrapedMarkdown = "";
+      let scrapedTitle: string | null = null;
+      if (urlTrim) {
+        setAnalyzePhase("scraping");
+        try {
+          const scraped = await scrapeUrl(urlTrim);
+          scrapedMarkdown = scraped.markdown;
+          scrapedTitle = scraped.title;
+        } catch (err) {
+          const msg = err instanceof ScrapeError ? err.message : (err instanceof Error ? err.message : "Scrape failed");
+          toast.error(msg);
+          setAnalyzePhase("idle"); setAnalyzing(false);
+          return;
+        }
+      }
+
+      setAnalyzePhase("extracting");
+      const combinedText = [textTrim, scrapedMarkdown && (scrapedTitle ? `# ${scrapedTitle}\n\n${scrapedMarkdown}` : scrapedMarkdown)]
+        .filter(Boolean).join("\n\n---\n\n");
+
       const res: any = await analyzeFn({
-        data: { sourceUrl: sourceUrl.trim(), rawText: rawText.trim(), images, mood, duration, platform },
+        data: {
+          // We've already fetched the URL; send content as rawText so the
+          // server doesn't re-fetch. Keep sourceUrl for history/attribution.
+          sourceUrl: urlTrim,
+          rawText: combinedText,
+          images,
+          mood, duration, platform,
+        },
       });
       const r = res.research as ResearchPayload;
       setResearch(r);
@@ -181,7 +213,7 @@ function Dashboard() {
       toast.success(`Extracted ${r.interactive_pointers.length} pointers`);
       refreshHistory();
     } catch (err) { toast.error(err instanceof Error ? err.message : "Analysis failed"); }
-    finally { setAnalyzing(false); }
+    finally { setAnalyzing(false); setAnalyzePhase("idle"); }
   }
 
   async function handleGenerate() {
@@ -349,8 +381,20 @@ function Dashboard() {
                   </div>
                 )}
                 <button onClick={handleAnalyze} disabled={analyzing}
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-white/10 hover:bg-white/15 border border-border px-4 py-3 font-semibold transition disabled:opacity-60">
-                  {analyzing ? <><Loader2 className="h-4 w-4 animate-spin" /> Analyzing source…</> : <><Search className="h-4 w-4" /> Analyze content</>}
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-primary hover:brightness-110 text-primary-foreground shadow-glow px-4 py-3 font-semibold transition disabled:opacity-60">
+                  {analyzing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      {analyzePhase === "scraping"
+                        ? "🛡️ Bypassing security & reading page…"
+                        : "🧬 Extracting 5–8 key viral pointers…"}
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4" />
+                      {inputMode === "url" ? "Analyze Website ✨" : "Analyze content"}
+                    </>
+                  )}
                 </button>
               </div>
 
