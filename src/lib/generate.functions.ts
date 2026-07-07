@@ -197,6 +197,7 @@ async function fetchUrlText(url: string): Promise<string> {
 const AnalyzeInput = z.object({
   sourceUrl: z.string().optional().default(""),
   rawText: z.string().optional().default(""),
+  images: z.array(z.string()).optional().default([]), // data:image/...;base64,... URLs
   mood: z.string().min(1),
   duration: z.string().min(1),
   platform: z.string().min(1),
