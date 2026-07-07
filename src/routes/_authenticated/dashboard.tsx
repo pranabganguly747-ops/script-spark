@@ -165,13 +165,13 @@ function Dashboard() {
 
   async function handleAnalyze() {
     if (analyzing) return;
-    if (!sourceUrl.trim() && !rawText.trim()) {
-      return toast.error("Add a URL or paste some research text");
+    if (!sourceUrl.trim() && !rawText.trim() && images.length === 0) {
+      return toast.error("Add a URL, paste text, or upload screenshots");
     }
     setAnalyzing(true); setMarkdown(null); setResearch(null); setApprovedIds(new Set());
     try {
       const res: any = await analyzeFn({
-        data: { sourceUrl: sourceUrl.trim(), rawText: rawText.trim(), mood, duration, platform },
+        data: { sourceUrl: sourceUrl.trim(), rawText: rawText.trim(), images, mood, duration, platform },
       });
       const r = res.research as ResearchPayload;
       setResearch(r);
