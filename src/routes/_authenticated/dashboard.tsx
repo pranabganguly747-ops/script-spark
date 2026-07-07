@@ -88,6 +88,7 @@ function Dashboard() {
 
   // State
   const [analyzing, setAnalyzing] = useState(false);
+  const [analyzePhase, setAnalyzePhase] = useState<"idle" | "scraping" | "extracting">("idle");
   const [generating, setGenerating] = useState(false);
   const [research, setResearch] = useState<ResearchPayload | null>(null);
   const [approvedIds, setApprovedIds] = useState<Set<number>>(new Set());
