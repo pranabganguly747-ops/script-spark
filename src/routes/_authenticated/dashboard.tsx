@@ -73,9 +73,10 @@ function Dashboard() {
   const [activeId, setActiveId] = useState<string | null>(null);
 
   // Stage 1 inputs
-  const [inputMode, setInputMode] = useState<"url" | "text">("url");
+  const [inputMode, setInputMode] = useState<"url" | "text" | "images">("url");
   const [sourceUrl, setSourceUrl] = useState("");
   const [rawText, setRawText] = useState("");
+  const [images, setImages] = useState<string[]>([]); // base64 data URLs
   const [mood, setMood] = useState(MOODS[0]);
   const [duration, setDuration] = useState(DURATIONS[1]);
   const [platform, setPlatform] = useState(PLATFORMS[0]);
