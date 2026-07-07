@@ -66,7 +66,7 @@ JSON SCHEMA:
   "recommended_angle": "1-sentence recommendation on the most viral narrative framing"
 }
 
-If the content is empty/unparseable/paywalled, return: { "error": true, "message": "Unable to extract content. Please ensure the URL is publicly accessible or paste the raw markdown/text directly." }`;
+If the content is empty/unparseable/paywalled, return: { "error": true, "message": "The provided content was too short or unstructured to extract pointers. Add more text or upload a screenshot." }`;
 
 const STAGE2_SYSTEM = `You are ScriptDNA's executive script producer and retention psychologist. Ingest APPROVED pointers only and synthesize a retention-engineered production package that clones the target Creator DNA.
 

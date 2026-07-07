@@ -197,9 +197,10 @@ function Dashboard() {
 
       const res: any = await analyzeFn({
         data: {
-          // We've already fetched the URL; send content as rawText so the
-          // server doesn't re-fetch. Keep sourceUrl for history/attribution.
-          sourceUrl: urlTrim,
+          // We already scraped via Jina; do NOT pass sourceUrl or the server
+          // will re-fetch and append blocked/garbage HTML on top of the clean
+          // markdown, causing the model to return an "unparseable" error.
+          sourceUrl: "",
           rawText: combinedText,
           images,
           mood, duration, platform,
